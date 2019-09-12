@@ -26,5 +26,8 @@ and then running:
 
 Some good reading:
 
-1. Stack vs. Heap memory allocation (for large arrays)
+1. A great lecture to get started
+https://www.youtube.com/watch?v=_41LCMFpsFs
+
+2. Stack vs. Heap memory allocation (for large arrays)
 https://stackoverflow.com/questions/10575544/difference-between-array-type-and-array-allocated-with-malloc
