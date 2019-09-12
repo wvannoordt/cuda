@@ -1,5 +1,5 @@
 # cuda
-A repository for the implementation and benchmarking of a mandelbrot renderer
+A repository for the implementation and benchmarking of a mandelbrot renderer and also some other fun things perhaps
 
 To install CUDA, first follow the install procedure here:
 https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&target_distro=Ubuntu&target_version=1804&target_type=deblocal
