@@ -86,7 +86,7 @@ int main()
 	printf("...\n");
 	printf("y[N - 1] = %f\n", host_y[N - 1]);
 
-	//Free the memory. "cudaFree" is a CUDA built-in.
+	// Free the memory. "cudaFree" is a CUDA built-in.
 	cudaFree(device_x);
 	cudaFree(device_y);
 
