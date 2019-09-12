@@ -22,3 +22,9 @@ and then running:
   Copyright (c) 2005-2017 NVIDIA Corporation
   Built on Fri_Nov__3_21:07:56_CDT_2017
   Cuda compilation tools, release 9.1, V9.1.85
+
+
+Some good reading:
+
+1. Stack vs. Heap memory allocation (for large arrays)
+https://stackoverflow.com/questions/10575544/difference-between-array-type-and-array-allocated-with-malloc
