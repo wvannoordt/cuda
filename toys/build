@@ -1,0 +1,6 @@
+nvcc main.cu -o main
+if [ "$1" == "-r" ]
+then
+	shift
+	./main
+fi
