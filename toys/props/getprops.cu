@@ -19,7 +19,8 @@ int main()
 		printf("  Max Threads Dim: %d x %d x %d\n", prop.maxThreadsDim[0], prop.maxThreadsDim[1], prop.maxThreadsDim[2]);
 		printf("  Max Threads Per Block: %d\n", prop.maxThreadsPerBlock);
 		printf("  Memory Bus Width (bits): %d\n", prop.memoryBusWidth);
-		printf("  Peak Memory Bandwidth (GB/s): %f\n\n", 2.0*prop.memoryClockRate*(prop.memoryBusWidth/8)/1.0e6);
+		printf("  Peak Memory Bandwidth (GB/s): %f\n", 2.0*prop.memoryClockRate*(prop.memoryBusWidth/8)/1.0e6);
+		printf("  Global Memory (GB): %f\n\n", prop.totalGlobalMem / (1024.0f*1024.0f * 1024.0f));
 	}
 	return 0;
 }
