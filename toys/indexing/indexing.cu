@@ -3,11 +3,10 @@
 // Not working currently.
 __global__ void cuda_saxpy_mat_1(int N, float a, float *x, float *y)
 {
-	int i = blockIdx.y*blockDim.y + threadIdx.y;
 	int j = blockIdx.x*blockDim.x + threadIdx.x;
-	if (i < N && j < N)
+	if (j < N*N)
 	{
-		int index = i + j*N;
+		int index = j;
 		y[index] = a * x[index] + y[index];
 	}
 }
@@ -18,7 +17,7 @@ __global__ void cuda_saxpy_mat_2(int N, float a, float *x, float *y)
 	int j = blockIdx.y*blockDim.y + threadIdx.y;
 	if (i < N && j < N)
 	{
-		int index = i + j*N;
+		int index = j + i*N;
 		y[index] = a* x[index] + y[index];
 	}
 }
@@ -47,8 +46,8 @@ int main()
 	cudaMalloc(&device_x, N*N*sizeof(float)); 
 	cudaMalloc(&device_y, N*N*sizeof(float));
 
-	dim3 blocks_per_grid((N+255)/256, (N+255)/256, 1);
-	dim3 threads_per_block(256, 256, 1);
+	dim3 blocks_per_grid((N*N+255)/256, 1, 1);
+	dim3 threads_per_block(256, 1, 1);
 
 	for (int j = 0; j < N; j++)
 	{
