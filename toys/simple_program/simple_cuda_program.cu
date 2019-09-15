@@ -34,7 +34,7 @@ int main()
 	cudaMalloc(&device_x, N*sizeof(float)); 
 	cudaMalloc(&device_y, N*sizeof(float));
 
-	// Give the parallel structure of the problem. The triplet gives block count in heach parallelization direction.
+	// Give the parallel structure of the problem. The triplet gives block count in each parallelization direction.
 	dim3 blocks_per_grid((N+255)/256, 1, 1);
 	dim3 threads_per_block(256, 1, 1);
 
