@@ -1,38 +1,35 @@
 #include <stdio.h>
 #include <time.h>
 
-#define DEBUG true
+#define DEBUG false
 
-// Not working currently.
-__global__ void cuda_saxpy_mat_1(long N, float a, float *x, float *y)
+
+// Simple SAXPY operation.
+__global__ void cuda_saxpy_mat_1(int N, float a, float *x, float *y)
 {
-	int j = blockIdx.x*blockDim.x + threadIdx.x;
-	if (j < N*N)
+	int index = blockIdx.x*blockDim.x + threadIdx.x;
+	if (index < N*N)
 	{
-		int index = j;
 		y[index] = a * x[index] + y[index];
 	}
 }
 
-__global__ void cuda_saxpy_mat_2(long N, float a, float *x, float *y)
+void wait()
 {
-	int i = blockIdx.x*blockDim.x + threadIdx.x;
-	int j = blockIdx.y*blockDim.y + threadIdx.y;
-	if (i < N && j < N)
-	{
-		int index = j + i*N;
-		y[index] = a* x[index] + y[index];
-	}
+	puts("Press any key to continue...");
+	getchar();
 }
 
-double run_computation(bool on_gpu, long N)
+// Heavy lifting
+double run_computation(bool on_gpu, int N)
 {
 #if(DEBUG)
-	printf("N = %ld\n\n", N);
+	printf("N = %d\n\n", N);
 #endif
 
 	float a = 6.0f;
 	float *host_x, *host_y, *device_x, *device_y;
+	
 	host_x = (float*)malloc(N*N*sizeof(float));
 	host_y = (float*)malloc(N*N*sizeof(float));
 
@@ -43,7 +40,6 @@ double run_computation(bool on_gpu, long N)
 	}
 	dim3 blocks_per_grid((N*N+255)/256, 1, 1);
 	dim3 threads_per_block(256, 1, 1);
-
 	for (int j = 0; j < N; j++)
 	{
 		for (int i = 0; i < N; i++) 
@@ -76,15 +72,19 @@ double run_computation(bool on_gpu, long N)
 
 	clock_t start, end;
 	double time_used;
-
 	if (on_gpu)
 	{
+		// Runs on the GPU.
 		start = clock();
 		cuda_saxpy_mat_1<<<blocks_per_grid,threads_per_block>>>(N, a, device_x, device_y);
+		
+		// This is only a fair comparison if the device synchronization is invoked, since it awaits the end of the computation.
+		cudaDeviceSynchronize();
 		end = clock();
 	}
 	else
 	{
+		// Runs on the CPU.
 		start = clock();
 		for (int j = 0; j < N; j++)
 		{
@@ -120,10 +120,6 @@ double run_computation(bool on_gpu, long N)
 		cudaFree(device_x);
 		cudaFree(device_y);
 	}
-	
-	free(host_x);
-	free(host_y);
-
 #if (DEBUG)
 	if (on_gpu)
 	{
@@ -139,27 +135,40 @@ double run_computation(bool on_gpu, long N)
 		printf("Error detected. Stop.\n\n");
 		exit(1);
 	}
+	free(host_x);
+	free(host_y);
 	return 1e3*time_used;
 }
 
 int main() 
 {
-	long N = 1<<7;
-	long N2 = N*N;
-	printf("Runtimes for N*N = %ld (%f MB):\n\n", N2, N2/(1024.0f*1024.0f));
+	// Benchmarks a SAXPY matrix operation on CPU vs GPU
+	
+	// Define the dimensions of the matrix. GPU performance overtakes CPU performance around N = 2^11 - 2^12 (64 MB).
+	// Program crashes for N = 2^15 (4 GB).
+	int N = 1<<14;
+	int N2 = N*N;
+	
+	// Output
+	printf("Runtimes for N*N = %d (%f MB):\n\n", N2, sizeof(float)*N2/(1024.0f*1024.0f));
+	
 	clock_t start, end;
 	double time_used_total_cpu, time_used_total_gpu;
 	
-	start = clock();
-	double cpu_time = run_computation(false, N);
-	end = clock();
-	printf("hihihi");
-	time_used_total_cpu = 1e3*((double) (end - start)) / CLOCKS_PER_SEC;
+	
+	// Run on GPU first
 	start = clock();
 	double gpu_time = run_computation(true, N);
 	end = clock();
 	time_used_total_gpu = 1e3*((double) (end - start)) / CLOCKS_PER_SEC;
 	
+	// Run on CPU
+	start = clock();
+	double cpu_time = run_computation(false, N);
+	end = clock();
+	time_used_total_cpu = 1e3*((double) (end - start)) / CLOCKS_PER_SEC;
+	
+	// Output
 	printf("    CPU computation: %f ms\n", cpu_time);
 	printf("    CPU total:       %f ms\n\n", time_used_total_cpu);
 	printf("    GPU computation: %f ms\n", gpu_time);
