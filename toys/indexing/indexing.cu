@@ -5,11 +5,10 @@ __global__ void cuda_saxpy_mat_1(int N, float a, float *x, float *y)
 {
 	int i = blockIdx.y*blockDim.y + threadIdx.y;
 	int j = blockIdx.x*blockDim.x + threadIdx.x;
-	printf("k");
 	if (i < N && j < N)
 	{
 		int index = i + j*N;
-		y[index] = a* x[index] + y[index];
+		y[index] = a * x[index] + y[index];
 	}
 }
 
@@ -56,7 +55,7 @@ int main()
 		for (int i = 0; i < N; i++) 
 		{
 			*(host_x + i*N + j) = 1.0f;
-			*(host_y + i*N + j) = 2.0f;
+			*(host_y + i*N + j) = 3.0f;
 		}
 	}
 
