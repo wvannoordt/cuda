@@ -3,30 +3,25 @@
 
 #define BLOCK_SIZE 16
 
-typedef struct
-{
-	int width;
-	int height;
-	float* elements;
-} Matrix;
+#include "main_func.h"
 
 //Forward declaration of kernel! (prototyping)
-__global__ void MatMul(const Matrix, const Matrix, Matrix);
+__global__ void MatMulKernel(const Matrix, const Matrix, Matrix);
 
-void MatrixMultiply(const Matrix A, const Matrix B, Matrix C)
+void MatMul(const Matrix A, const Matrix B, Matrix C)
 {
 	//Load A, B to device memory
 	Matrix d_A;
 	d_A.width = A.width;
 	d_A.height = A.height;
-	size_t size = A.width * A.height * sizeof(float);
+	size_t size = A.width * A.height * sizeof(specified_precision);
 	cudaMalloc(&d_A.elements, size);
 	cudaMemcpy(d_A.elements, A.elements, size, cudaMemcpyHostToDevice);
 	
 	Matrix d_B;
 	d_B.width = B.width;
 	d_B.height = B.height;
-	size = B.width * B.height * sizeof(float);
+	size = B.width * B.height * sizeof(specified_precision);
 	cudaMalloc(&d_B.elements, size);
 	cudaMemcpy(d_B.elements, B.elements, size, cudaMemcpyHostToDevice);
 	
@@ -34,13 +29,13 @@ void MatrixMultiply(const Matrix A, const Matrix B, Matrix C)
 	Matrix d_C;
 	d_C.width = C.width;
 	d_C.height = C.height;
-	size = C.width * C.height * sizeof(float);
+	size = C.width * C.height * sizeof(specified_precision);
 	cudaMalloc(&d_C.elements, size);
 	
 	//Invoke kernel
 	dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
 	dim3 dimGrid(B.width/dimBlock.x, A.height / dimBlock.y);
-	MatMul<<<dimGrid, dimBlock>>>(d_A, d_B, d_C);
+	MatMulKernel<<<dimGrid, dimBlock>>>(d_A, d_B, d_C);
 	
 	//Read C to host
 	cudaMemcpy(C.elements, d_C.elements, size, cudaMemcpyDeviceToHost);
@@ -52,22 +47,17 @@ void MatrixMultiply(const Matrix A, const Matrix B, Matrix C)
 }
 
 //Kernel
-__global__ void MatMul(Matrix A, Matrix B, Matrix C)
+__global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 {
 	//One element of C computed by one thread in the kernel.
-	float thread_c_value = 0;
+	specified_precision thread_c_value = 0;
 	int row = blockIdx.y*blockDim.y + threadIdx.y;
 	int col = blockIdx.x*blockDim.x + threadIdx.x;
 	for (int row_col_idx = 0; row_col_idx < A.width; row_col_idx++)
 	{
 		thread_c_value += A.elements[row*A.width + row_col_idx]*B.elements[row_col_idx*B.width + col];
 	}
-	C.elements(row*C.width+col) = thread_c_value;
-}
-
-int main()
-{
-	return 0;
+	C.elements[row*C.width+col] = thread_c_value;
 }
 
 //Notes:

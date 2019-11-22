@@ -7,21 +7,16 @@
 //The stride field has been added so that sub-matrices can be efficiently represented.
 
 
-typedef struct
-{
-	int width;
-	int height;
-	int stride;
-	float* elements;
-} Matrix;
+#include "main_func.h"
+
 
 //Note that functions prefized with __device__ are designated to run on the device...
 //Get/Set matrix elements
-__device__ float GetElement(const Matrix A, int row, int col)
+__device__ specified_precision GetElement(const Matrix A, int row, int col)
 {
 	return A.elements[row*A.stride + col];
 }
-__device__ float SetElement(const Matrix A, int row, int col, float set_value)
+__device__ specified_precision SetElement(const Matrix A, int row, int col, specified_precision set_value)
 {
 	return A.elements[row*A.stride + col] = set_value;
 }
@@ -41,14 +36,14 @@ __device__ Matrix GetSubMatrix(const Matrix A, int row, int col)
 //Prototype
 __global__ void MatMulKernel(const Matrix, const Matrix, Matrix);
 
-void MatMul(const Matrix A, const Matric B, Matrix C)
+void MatMul(const Matrix A, const Matrix B, Matrix C)
 {
 	//Load A, B to device memory
 	Matrix d_A;
 	d_A.width = A.width;
 	d_A.stride = A.width;
 	d_A.height = A.height;
-	size_t size = A.width * A.height * sizeof(float);
+	size_t size = A.width * A.height * sizeof(specified_precision);
 	cudaMalloc(&d_A.elements, size);
 	cudaMemcpy(d_A.elements, A.elements, size, cudaMemcpyHostToDevice);
 	
@@ -56,7 +51,7 @@ void MatMul(const Matrix A, const Matric B, Matrix C)
 	d_B.width = B.width;
 	d_B.stride = B.stride;
 	d_B.height = B.height;
-	size = B.width * B.height * sizeof(float);
+	size = B.width * B.height * sizeof(specified_precision);
 	cudaMalloc(&d_B.elements, size);
 	cudaMemcpy(d_B.elements, B.elements, size, cudaMemcpyHostToDevice);
 	
@@ -65,13 +60,13 @@ void MatMul(const Matrix A, const Matric B, Matrix C)
 	d_C.width = C.width;
 	d_C.stride = C.stride;
 	d_C.height = C.height;
-	size = C.width * C.height * sizeof(float);
+	size = C.width * C.height * sizeof(specified_precision);
 	cudaMalloc(&d_C.elements, size);
 	
 	//Invoke kernel
 	dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
 	dim3 dimGrid(B.width/dimBlock.x, A.height / dimBlock.y);
-	MatMul<<<dimGrid, dimBlock>>>(d_A, d_B, d_C);
+	MatMulKernel<<<dimGrid, dimBlock>>>(d_A, d_B, d_C);
 	
 	//Read C to host
 	cudaMemcpy(C.elements, d_C.elements, size, cudaMemcpyDeviceToHost);
@@ -96,8 +91,8 @@ __global__ void MatMulKernel(const Matrix A, const Matrix B, Matrix C)
 	float thread_c_value = 0;
 	
 	//thread row and column index within Csub
-	int row threadIdx.y;
-	int col threadIdx.x;
+	int row = threadIdx.y;
+	int col = threadIdx.x;
 	
 	//Loop over all sub-matrices of A and B required to compute Csub, multiply
 	//each pair of sub-matrices together and accumulate results
@@ -109,8 +104,8 @@ __global__ void MatMulKernel(const Matrix A, const Matrix B, Matrix C)
 		Matrix Bsub = GetSubMatrix(B, m, blockCol);
 		
 		//Shared memory used to store Asub and Bsub respectively
-		__shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
-		__shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
+		__shared__ specified_precision As[BLOCK_SIZE][BLOCK_SIZE];
+		__shared__ specified_precision Bs[BLOCK_SIZE][BLOCK_SIZE];
 		
 		//Load Asub and Bsub from device memory to chared memory.
 		//Each thread loads one element of each sub-matrix.
