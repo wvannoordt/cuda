@@ -20,6 +20,8 @@ typedef struct
 	specified_precision* elements;
 } Matrix;
 
+void MatMul(const Matrix, const Matrix, Matrix);
+
 void H_set_element(Matrix M, int row, int col, specified_precision elem)
 {
 	*(M.elements + row*M.stride + col) = elem;
@@ -30,15 +32,14 @@ specified_precision H_get_element(Matrix M, int row, int col)
 	return *(M.elements + row*M.stride + col);
 }
 
-int main()
+Matrix init_rand_matrix_blocksize(int row_blocks, int col_blocks)
 {
 	Matrix A;
-	int N_blocks = 5;
 	specified_precision* a_base;
 	
-	A.width = N_blocks*BLOCK_SIZE;
-	A.height = N_blocks*BLOCK_SIZE;
-	A.stride = N_blocks*BLOCK_SIZE;
+	A.width = col_blocks*BLOCK_SIZE;
+	A.height = row_blocks*BLOCK_SIZE;
+	A.stride = col_blocks*BLOCK_SIZE;
 	
 	size_t a_elem_size = A.width*A.height*sizeof(specified_precision);
 	a_base = (specified_precision*)malloc(a_elem_size);
@@ -51,11 +52,43 @@ int main()
 		{
 			specified_precision entry = (specified_precision)rand()/RAND_MAX;
 			H_set_element(A, i, j, entry);
-			std::cout << entry << std::endl;
 		}
 	}
 	
-	free(a_base);
+	return A;
+}
+
+Matrix init_empty_matrix_blocksize(int row_blocks, int col_blocks)
+{
+	Matrix A;
+	specified_precision* a_base;
+	
+	A.width = col_blocks*BLOCK_SIZE;
+	A.height = row_blocks*BLOCK_SIZE;
+	A.stride = col_blocks*BLOCK_SIZE;
+	
+	size_t a_elem_size = A.width*A.height*sizeof(specified_precision);
+	a_base = (specified_precision*)malloc(a_elem_size);
+	
+	A.elements = a_base;
+	return A;
+}
+
+int main()
+{
+
+	int N_blocks = 500;
+	
+	Matrix A = init_rand_matrix_blocksize(N_blocks, N_blocks);
+	Matrix B = init_rand_matrix_blocksize(N_blocks, N_blocks);
+	Matrix C = init_empty_matrix_blocksize(N_blocks, N_blocks);
+	
+	MatMul(A,B,C);
+	
+	free(A.elements);
+	free(B.elements);
+	free(C.elements);
+	
 	
 	return 0;
 }
