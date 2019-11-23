@@ -85,6 +85,10 @@ int main()
 	
 	MatMul(A,B,C);
 	
+	std::cout << H_get_element(A, 0, 0) << std::endl;
+	std::cout << H_get_element(B, 0, 0) << std::endl;
+	std::cout << H_get_element(C, 1, 0) << std::endl;
+	
 	free(A.elements);
 	free(B.elements);
 	free(C.elements);
