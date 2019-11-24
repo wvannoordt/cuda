@@ -3,7 +3,7 @@
 
 #define BLOCK_SIZE 16
 
-#define KERNEL_DEBUG 0
+#define KERNEL_DEBUG 1
 
 #include "main_func.h"
 
@@ -60,9 +60,6 @@ void MatMul(const Matrix A, const Matrix B, Matrix C)
 //Kernel
 __global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 {
-#if (KERNEL_DEBUG ==1)
-	printf("Hello, world from the device!\n");
-#endif
 	//One element of C computed by one thread in the kernel.
 	specified_precision thread_c_value = 0;
 	int row = blockIdx.y*blockDim.y + threadIdx.y;

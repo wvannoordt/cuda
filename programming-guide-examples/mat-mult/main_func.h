@@ -77,7 +77,7 @@ Matrix init_empty_matrix_blocksize(int row_blocks, int col_blocks)
 int main()
 {
 
-	int N_blocks = 50;
+	int N_blocks = 140;
 	int N_test = 5;
 
 
