@@ -13,4 +13,4 @@ if [ ! -z $1 ]; then
 	fi
 fi
 
-echo $COMPILER $FLAGS program main.h
+$COMPILER $FLAGS program main.h
