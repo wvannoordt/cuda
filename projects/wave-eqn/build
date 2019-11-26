@@ -1,0 +1,16 @@
+COMPILER="nvcc"
+FLAGS="--output-file"
+
+if [ ! -z $1 ]; then
+	if [ $1 == "-r8" ]; then
+		FLAGS="-D PRECISION=2 $FLAGS"
+		echo "Building with double precision"
+	elif [ $1 == "-r4" ]; then
+		FLAGS="-D PRECISION=1 $FLAGS"
+		echo "Building with single precision"
+	else
+		echo "Unkown option $1"
+	fi
+fi
+
+echo $COMPILER $FLAGS program main.h
