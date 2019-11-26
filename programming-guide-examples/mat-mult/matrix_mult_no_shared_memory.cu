@@ -45,7 +45,7 @@ void MatMul(const Matrix A, const Matrix B, Matrix C)
 	cudaError = cudaGetLastError();
 	if(cudaError != cudaSuccess)
 	{
-		printf("  cudaGetLastError() returned %d: %s\n", cudaError, cudaGetErrorString(cudaError));
+		printf("cudaGetLastError() returned %d: %s\n", cudaError, cudaGetErrorString(cudaError));
 	}
 #endif
 	//Read C to host
