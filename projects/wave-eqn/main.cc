@@ -43,19 +43,16 @@ int main()
     specified_precision inverse_dx = domain_width_points/domain_length_x;
     specified_precision inverse_dy = domain_width_points/domain_length_y;
 
-    std::cout << "E.g. entry (0,0) is a function of entry (1,0) and (0,1)," << std::endl;
-    int a, b, c;
-    double_to_single_idx(0,0,&a,domain_width_points);
-    double_to_single_idx(1,0,&b,domain_width_points);
-    double_to_single_idx(0,1,&c,domain_width_points);
-    std::cout << "so vector entry "<< a << " is a function of vector entry ";
-    std::cout << b << " and vector entry " << c << "." << std::endl;
-    
-	int last_block_entry = BLOCK_SIZE*BLOCK_SIZE - 1;
-	int x, y;
-	std::cout << last_block_entry << std::endl;
-	single_to_double_idx(last_block_entry, &x, &y, domain_width_points);
-	std::cout << x << ", " << y << std::endl;
-
+    for (int i = 0; i < grid_dimension*grid_dimension; i++)
+    {
+        if (i < 3 || i > grid_dimension*grid_dimension - 3)
+        {
+            std::cout << "Block " << i << " handles x_" << i*BLOCK_SIZE*BLOCK_SIZE << " thru x_" << i*BLOCK_SIZE*BLOCK_SIZE + BLOCK_SIZE*BLOCK_SIZE - 1 << std::endl;
+        }
+        else if (i == 4)
+        {
+            std::cout << "..." << std::endl;
+        }
+    }
     return 0;
 }
