@@ -43,21 +43,27 @@ int main()
     specified_precision inverse_dx = domain_width_points/domain_length_x;
     specified_precision inverse_dy = domain_width_points/domain_length_y;
 
-    int x1,y1,x2,y2,init,term,x_inq,y_inq,l_bound,u_bound,depend;
+    bool all_write = true;
+
+    int x1,y1,x2,y2,init,term,x_inq,y_inq,l_bound,u_bound,depend, cur_low_bound, cur_upp_bound;
     for (int i = 0; i < grid_dimension*grid_dimension; i++)
     {
-        l_bound = grid_dimension + 1;
+        l_bound = domain_width_points*domain_width_points;
         u_bound = -1;
         init = i*BLOCK_SIZE*BLOCK_SIZE;
         term = i*BLOCK_SIZE*BLOCK_SIZE + BLOCK_SIZE*BLOCK_SIZE - 1;
         single_to_double_idx(init, &x1, &y1, domain_width_points);
         single_to_double_idx(term, &x2, &y2, domain_width_points);
-        if (i < 3 || i > grid_dimension*grid_dimension - 4)
+        cur_low_bound = init - domain_width_points;
+        cur_upp_bound = term + domain_width_points;
+        cur_low_bound = cur_low_bound < 0 ? 0 : cur_low_bound;
+        cur_upp_bound = cur_upp_bound > domain_width_points*domain_width_points ? domain_width_points*domain_width_points : cur_upp_bound;
+        if (i < 3 || i > grid_dimension*grid_dimension - 4 || all_write)
         {
             std::cout << "Block " << i << " handles y_" << init;
             std::cout << " thru y_" << term;
             std::cout << ", grid_idx_1=(" << x1 << "," << y1 << ")";
-            std::cout << ", grid_idx_2=(" << x2 << "," << y2 << ")" << std::endl;
+            std::cout << ", grid_idx_2=(" << x2 << "," << y2 << ")";
 
             for (int k = init; k <= term; k++)
             {
@@ -88,9 +94,9 @@ int main()
                 }
             }
 
-            std::cout << "Requires x_" << l_bound << " thru x_" << u_bound << std::endl;
+            std::cout << ". Requires x_" << l_bound << " thru x_" << u_bound << ", expl. " << cur_low_bound << ", to " << cur_upp_bound << "." << std::endl;
         }
-        else if (i == 4)
+        else if (i == 4 && !all_write)
         {
             std::cout << "..." << std::endl;
         }
